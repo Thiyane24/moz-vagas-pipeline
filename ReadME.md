@@ -51,7 +51,7 @@ emprego.co.mz_ETL_Pipeline/
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
-├── pipeline.py             
+├── main.py             
 ├── requirements.txt
 └── README.md
 ```
@@ -93,7 +93,7 @@ AWS_BUCKET_NAME=your_bucket_name
 
 ```bash
 pip install -r requirements.txt
-python pipeline.py
+python main.py
 ```
 
 ### Run with Docker
@@ -107,7 +107,7 @@ docker-compose up --build
 ## Testing
 
 ```bash
-pytest tests/
+pytest tests/unit_tests.py -v
 ```
 
 Three unit tests cover the scraper parsing logic and the S3 storage connection guard.
