@@ -14,4 +14,4 @@ COPY . .
 RUN mkdir -p data/raw data/processed
 
 # Corre o pipeline
-CMD ["python", "pipeline.py"]
+CMD ["python", "main.py"]
