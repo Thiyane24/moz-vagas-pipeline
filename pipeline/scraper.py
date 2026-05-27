@@ -61,54 +61,46 @@ class Scraper:
             })
 
         return vagas
+    
+    def run(self):  
+        todas_as_vagas = []
+        seen_links = set()
+        first_page_links = None
+        max_paginas = 15
 
+        for page in range(1, max_paginas + 1):
+            print(f"A aceder à página {page} de {max_paginas}...")
+            html = self.fetch_page(page)
+
+            if not html:
+                break
+
+            vagas_da_pagina = self.parse_jobs(html)
+
+            if not vagas_da_pagina:
+                break
+
+            page_links = {v["link"] for v in vagas_da_pagina}
+            if page == 1:
+                first_page_links = page_links
+            elif page_links == first_page_links:
+                print(f"Página {page} repete a página 1. A parar.")
+                break
+
+            novas = [v for v in vagas_da_pagina if v["link"] not in seen_links]
+            seen_links.update(v["link"] for v in novas)
+            todas_as_vagas.extend(novas)
+
+        if todas_as_vagas:
+            df = pd.DataFrame(todas_as_vagas)
+            load_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+            caminho_parquet = f'data/raw/raw_vagas_{load_id}.parquet'
+            df.to_parquet(caminho_parquet)
+            print(f"Total de vagas: {len(df)}")
+            return caminho_parquet  # ← devolve o caminho para o pipeline usar
+        
+        return None
 
 if __name__ == "__main__":
-    print("Iniciando o teste do Scraper")
     bot = Scraper()
-
-    todas_as_vagas = []
-    seen_links = set()
-    first_page_links = None
-    max_paginas = 15
-
-    for page in range(1, max_paginas + 1):
-        print(f"A aceder à página {page} de {max_paginas}...")
-        html = bot.fetch_page(page)
-
-        if not html:
-            print(f"Falha ao obter o HTML da página {page}. A parar.")
-            break
-
-        vagas_da_pagina = bot.parse_jobs(html)
-
-        if not vagas_da_pagina:
-            print(f"Página {page} sem vagas. Fim da paginação.")
-            break
-
-        page_links = {v["link"] for v in vagas_da_pagina}
-        if page == 1:
-            first_page_links = page_links
-        elif page_links == first_page_links:
-            print(f"Página {page} repete a página 1. Sem mais páginas. A parar.")
-            break
-
-        novas = [v for v in vagas_da_pagina if v["link"] not in seen_links]
-        seen_links.update(v["link"] for v in novas)
-
-        print(f"Página {page}: {len(vagas_da_pagina)} encontradas, {len(novas)} novas.")
-        todas_as_vagas.extend(novas)
-
-    if todas_as_vagas:
-        df = pd.DataFrame(todas_as_vagas)
-        load_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        caminho_parquet = f'data/raw/raw_vagas_{load_id}.parquet'
-        df.to_parquet(caminho_parquet)
-
-        print("\n" + "=" * 50)
-        print(f"Pipeline Terminado")
-        print(f"Ficheiro gerado: {caminho_parquet}")
-        print(f"Total de vagas consolidadas: {len(df)}")
-        print(df.to_string())
-    else:
-        print("Nenhum dado foi extraído. Ficheiro Parquet não gerado.")
+    bot.run()
