@@ -6,10 +6,15 @@ An automated end-to-end ETL pipeline that scrapes job listings from emprego.co.m
 
 ## Architecture
 
+```
+emprego.co.mz  →  Scrape  →  Transform  →  Load to S3 Bucket
+                  
+Orchestrated by GitHub Actions
+Containerized with Docker
+Tested with Pytest
+```
 
-![Pipeline Architecture](assets/AWS_pipeline.png)
-
-
+---
 
 ## Pipeline Stages
 
@@ -29,24 +34,24 @@ Uploads the most recent processed Parquet file to an AWS S3 bucket under the `pr
 ```
 emprego.co.mz_ETL_Pipeline/
 ├── pipeline/
-│   ├── scraper.py          # Scraping logic with pagination and deduplication
-│   ├── transform.py        # Data cleaning and standardization
-│   └── storage.py          # AWS S3 upload
+│   ├── scraper.py          
+│   ├── transform.py        
+│   └── storage.py          
 ├── tests/
 │   ├── __init__.py
-│   ├── conftest.py         # Pytest fixtures and mock HTML
-│   └── unit_tests.py       # Unit tests for scraper and storage
+│   ├── conftest.py         
+│   └── unit_tests.py       
 ├── data/
-│   ├── raw/                # Raw Parquet files (gitignored)
-│   └── processed/          # Cleaned Parquet files (gitignored)
+│   ├── raw/                
+│   └── processed/          
 ├── .github/
 │   └── workflows/
-│       └── pipeline.yml    # GitHub Actions daily schedule
-├── .env.example            # Environment variable template
+│       └── pipeline.yml    
+├── .env.example           
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
-├── pipeline.py             # Entry point — runs all three stages
+├── pipeline.py             
 ├── requirements.txt
 └── README.md
 ```
@@ -112,6 +117,16 @@ Three unit tests cover the scraper parsing logic and the S3 storage connection g
 ## Automation
 
 The pipeline is scheduled to run daily at 06:00 UTC via GitHub Actions. AWS credentials are stored as GitHub Secrets and Variables. To trigger a manual run, go to **Actions → ETL Pipeline Diário → Run workflow**.
+
+---
+
+## Hire Me
+
+If you need a custom data pipeline, web scraper, or ETL solution, I am available for freelance work:
+
+- [Fiverr](https://www.fiverr.com/s/P2zEpZP)
+- [Upwork](https://www.upwork.com/services/product/development-it-a-custom-etl-data-pipeline-to-automate-your-data-integration-workflows-2057619530106098904?ref=project_share)
+- [Contra](https://contra.com/thiyane_xavier_jk3d916z?referralExperimentNid=DEFAULT_REFERRAL_PROGRAM&referrerUsername=thiyane_xavier_jk3d916z)
 
 ---
 
