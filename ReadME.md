@@ -1,0 +1,129 @@
+# emprego.co.mz ETL Pipeline
+
+An automated end-to-end ETL pipeline that scrapes job listings from emprego.co.mz, transforms and cleans the data, and loads it to an AWS S3 bucket. The pipeline runs daily via GitHub Actions and is fully containerized with Docker.
+
+---
+
+## Architecture
+
+
+![Pipeline Architecture](assets/AWS_pipeline.png)
+
+
+
+## Pipeline Stages
+
+**1. Scrape**
+Fetches job listings from emprego.co.mz with pagination support. Detects and stops when the site loops back to page 1. Deduplicates by job URL and saves the raw data as a timestamped Parquet file.
+
+**2. Transform**
+Reads the most recent raw Parquet file, handles null values, removes duplicate rows, and standardizes all text fields to lowercase. Saves the cleaned data to the processed layer.
+
+**3. Load**
+Uploads the most recent processed Parquet file to an AWS S3 bucket under the `processed/` prefix.
+
+---
+
+## Project Structure
+
+```
+emprego.co.mz_ETL_Pipeline/
+├── pipeline/
+│   ├── scraper.py          # Scraping logic with pagination and deduplication
+│   ├── transform.py        # Data cleaning and standardization
+│   └── storage.py          # AWS S3 upload
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py         # Pytest fixtures and mock HTML
+│   └── unit_tests.py       # Unit tests for scraper and storage
+├── data/
+│   ├── raw/                # Raw Parquet files (gitignored)
+│   └── processed/          # Cleaned Parquet files (gitignored)
+├── .github/
+│   └── workflows/
+│       └── pipeline.yml    # GitHub Actions daily schedule
+├── .env.example            # Environment variable template
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── pipeline.py             # Entry point — runs all three stages
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Data Schema
+
+| Column   | Description                              |
+|----------|------------------------------------------|
+| titulo   | Full job listing title                   |
+| link     | URL to the job posting                   |
+| role     | Job role extracted from the listing      |
+| empresa  | Company name                             |
+| location | City or region extracted from the title  |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.11+
+- Docker and Docker Compose
+- AWS account with an S3 bucket and IAM credentials
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in your values:
+
+```
+AWS_ACCESS_KEY=your_access_key
+AWS_SECRET_KEY=your_secret_key
+AWS_REGION=your_region
+AWS_BUCKET_NAME=your_bucket_name
+```
+
+### Run Locally
+
+```bash
+pip install -r requirements.txt
+python pipeline.py
+```
+
+### Run with Docker
+
+```bash
+docker-compose up --build
+```
+
+---
+
+## Testing
+
+```bash
+pytest tests/
+```
+
+Three unit tests cover the scraper parsing logic and the S3 storage connection guard.
+
+---
+
+## Automation
+
+The pipeline is scheduled to run daily at 06:00 UTC via GitHub Actions. AWS credentials are stored as GitHub Secrets and Variables. To trigger a manual run, go to **Actions → ETL Pipeline Diário → Run workflow**.
+
+---
+
+## Tech Stack
+
+| Tool            | Purpose                        |
+|-----------------|--------------------------------|
+| Python          | Core language                  |
+| BeautifulSoup4  | HTML parsing                   |
+| Pandas          | Data transformation            |
+| Parquet         | Storage format                 |
+| boto3           | AWS S3 integration             |
+| Docker          | Containerization               |
+| GitHub Actions  | Scheduling and orchestration   |
+| Pytest          | Unit testing                   |
