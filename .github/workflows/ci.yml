@@ -22,7 +22,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Correr os testes
-        run: pytest tests/
+        run: pytest tests/unit_tests.py -v
 
       - name: Correr o pipeline
         env:
