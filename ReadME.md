@@ -39,19 +39,19 @@ emprego.co.mz_ETL_Pipeline/
 │   └── storage.py          
 ├── tests/
 │   ├── __init__.py
-│   ├── conftest.py         # Pytest fixtures and mock HTML
-│   └── unit_tests.py       # Unit tests for scraper and storage
+│   ├── conftest.py        
+│   └── unit_tests.py       
 ├── data/
 │   ├── raw/                
 │   └── processed/          
 ├── .github/
 │   └── workflows/
-│       └── pipeline.yml    # GitHub Actions daily schedule
-├── .env.example            # Environment variable template
+│       └── pipeline.yml   
+├── .env.example            
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
-├── pipeline.py             # Entry point — runs all three stages
+├── pipeline.py            
 ├── requirements.txt
 └── README.md
 ```
