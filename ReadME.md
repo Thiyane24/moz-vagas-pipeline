@@ -1,144 +1,63 @@
-# emprego.co.mz ETL Pipeline
 
-An automated end-to-end ETL pipeline that scrapes job listings from emprego.co.mz, transforms and cleans the data, and loads it to an AWS S3 bucket. The pipeline runs daily via GitHub Actions and is fully containerized with Docker.
-
----
+# Multi-Source ETL Data Pipeline (Mozambique Job Market)
+An automated, scalable end-to-end ETL pipeline that aggregates real-time job market data from multiple Mozambican platforms, standardizes the information, and loads it into an AWS S3 Data Lake.
 
 ## Architecture
-
 ```
-emprego.co.mz  →  Scrape  →  Transform  →  Load to S3 Bucket
+[Web Sources] → Scrape (Parallel) → Transform (Unified) → Load to S3 (Gold Layer)
                   
 Orchestrated by GitHub Actions
 Containerized with Docker
 Tested with Pytest
+
 ```
-
----
-
 ## Pipeline Stages
-
-**1. Scrape**
-Fetches job listings from emprego.co.mz with pagination support. Detects and stops when the site loops back to page 1. Deduplicates by job URL and saves the raw data as a timestamped Parquet file.
-
-**2. Transform**
-Reads the most recent raw Parquet file, handles null values, removes duplicate rows, and standardizes all text fields to lowercase. Saves the cleaned data to the processed layer.
-
-**3. Load**
-Uploads the most recent processed Parquet file to an AWS S3 bucket under the `processed/` prefix.
-
----
+**1. Scrape (Bronze Layer)**
+Simultaneously fetches job listings from multiple sources (e.g., emprego.co.mz, MMO Vagas, VagasMoz). Handles pagination, deduplication, and stores raw data as timestamped Parquet files for full traceability.
+**2. Transform (Silver Layer)**
+Consolidates diverse source schemas into a unified dataset. Performs data cleaning, handles nulls, removes duplicates, and standardizes formats (lowercase, date normalization) to ensure high data quality.
+**3. Load (Gold Layer)**
+Uploads the cleaned, analytics-ready data to the AWS S3 Data Lake, structured with **Hive-style partitioning** (year=YYYY/month=MM/day=DD/) for efficient querying via Amazon Athena.
 
 ## Project Structure
-
 ```
-emprego.co.mz_ETL_Pipeline/
+Multi_Source_ETL_Pipeline/
 ├── pipeline/
-│   ├── scraper.py          
-│   ├── transform.py        
-│   └── storage.py          
-├── tests/
-│   ├── __init__.py
-│   ├── conftest.py        
-│   └── unit_tests.py       
-├── data/
-│   ├── raw/                
-│   └── processed/          
-├── .github/
-│   └── workflows/
-│       └── pipeline.yml   
-├── .env.example            
-├── .gitignore
-├── Dockerfile
-├── docker-compose.yml
-├── pipeline.py            
-├── requirements.txt
-└── README.md
-```
-
----
-
-## Data Schema
-
-| Column   | Description                              |
-|----------|------------------------------------------|
-| titulo   | Full job listing title                   |
-| link     | URL to the job posting                   |
-| role     | Job role extracted from the listing      |
-| empresa  | Company name                             |
-| location | City or region extracted from the title  |
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.11+
-- Docker and Docker Compose
-- AWS account with an S3 bucket and IAM credentials
-
-### Environment Variables
-
-Copy `.env.example` to `.env` and fill in your values:
+│   ├── scrapers/           # Individual source scrapers
+│   ├── transform.py        # Schema unification & cleaning
+│   └── storage.py          # S3 connection & partitioning logic
+├── tests/                  # Unit tests for parsing & storage
+├── data/                   # Local raw & processed staging
+├── .github/workflows/      # CI/CD and Daily automation
+├── Dockerfile              # Container definition
+├── docker-compose.yml      # Orchestration
+└── main.py                 # Pipeline entry point
 
 ```
-AWS_ACCESS_KEY=your_access_key
-AWS_SECRET_KEY=your_secret_key
-AWS_REGION=your_region
-AWS_BUCKET_NAME=your_bucket_name
-```
+## Tech Stack
+| Tool | Purpose |
+|---|---|
+| **Python** | Core logic & automation |
+| **Pandas** | Unified data transformation |
+| **Parquet** | Storage (Schema-safe & compressed) |
+| **boto3** | AWS S3 connectivity |
+| **Docker** | Environment consistency |
+| **GitHub Actions** | Orchestration & Scheduling |
 
-### Run Locally
 
+## How to Run
+### Run with Docker (Recommended)
+Ensures all dependencies and the environment are identical to production:
 ```bash
-pip install -r requirements.txt
-python main.py
+# Build and run the entire multi-source pipeline
+docker-compose up --build --force-recreate
+
 ```
-
-### Run with Docker
-
-```bash
-docker-compose up --build
-```
-
----
-
-## Testing
-
-```bash
-pytest tests/unit_tests.py -v
-```
-
-Three unit tests cover the scraper parsing logic and the S3 storage connection guard.
-
----
-
-## Automation
-
-The pipeline is scheduled to run daily at 06:00 UTC via GitHub Actions. AWS credentials are stored as GitHub Secrets and Variables. To trigger a manual run, go to **Actions → ETL Pipeline Diário → Run workflow**.
-
----
+### Automation
+The pipeline is scheduled to run daily via **GitHub Actions**. It automatically detects new job listings, processes them, and archives them in the S3 Data Lake, keeping your insights always up-to-date without manual intervention.
 
 ## Hire Me
-
-If you need a custom data pipeline, web scraper, or ETL solution, I am available for freelance work:
-
-- [Fiverr](https://www.fiverr.com/s/P2zEpZP)
-- [Upwork](https://www.upwork.com/services/product/development-it-a-custom-etl-data-pipeline-to-automate-your-data-integration-workflows-2057619530106098904?ref=project_share)
-- [Contra](https://contra.com/thiyane_xavier_jk3d916z?referralExperimentNid=DEFAULT_REFERRAL_PROGRAM&referrerUsername=thiyane_xavier_jk3d916z)
-
----
-
-## Tech Stack
-
-| Tool            | Purpose                        |
-|-----------------|--------------------------------|
-| Python          | Core language                  |
-| BeautifulSoup4  | HTML parsing                   |
-| Pandas          | Data transformation            |
-| Parquet         | Storage format                 |
-| boto3           | AWS S3 integration             |
-| Docker          | Containerization               |
-| GitHub Actions  | Scheduling and orchestration   |
-| Pytest          | Unit testing                   |
+I specialize in building resilient data systems, custom scrapers, and automated ETL pipelines. If you have a data integration challenge, let's talk:
+ * Fiverr
+ * Upwork
+ * Contra
