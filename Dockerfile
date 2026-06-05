@@ -1,17 +1,16 @@
 FROM python:3.11-slim
 
-# Define o directório de trabalho
 WORKDIR /app
 
-# Copia e instala as dependências
+# 1. Instala dependências 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia o código todo
-COPY . .
-
-# Cria as pastas de dados
+# 2. Cria as pastas necessárias
 RUN mkdir -p data/raw data/processed
 
-# Corre o pipeline
+# 3. Copia o código 
+COPY pipeline/ ./pipeline/
+COPY main.py .
+
 CMD ["python", "main.py"]
