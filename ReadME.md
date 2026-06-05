@@ -12,10 +12,13 @@ Tested with Pytest
 
 ```
 ## Pipeline Stages
+
 **1. Scrape (Bronze Layer)**
 Simultaneously fetches job listings from multiple sources (e.g., emprego.co.mz, MMO Vagas, VagasMoz). Handles pagination, deduplication, and stores raw data as timestamped Parquet files for full traceability.
+
 **2. Transform (Silver Layer)**
 Consolidates diverse source schemas into a unified dataset. Performs data cleaning, handles nulls, removes duplicates, and standardizes formats (lowercase, date normalization) to ensure high data quality.
+
 **3. Load (Gold Layer)**
 Uploads the cleaned, analytics-ready data to the AWS S3 Data Lake, structured with **Hive-style partitioning** (year=YYYY/month=MM/day=DD/) for efficient querying via Amazon Athena.
 
